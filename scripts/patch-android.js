@@ -11,4 +11,7 @@ const g='android/app/build.gradle';let b=fs.readFileSync(g,'utf8');
 const n=process.env.GITHUB_RUN_NUMBER||'1';
 b=b.replace(/versionCode \d+/,`versionCode ${n}`).replace(/versionName "[^"]*"/,`versionName "1.0.${n}"`);
 fs.writeFileSync(g,b);
-console.log('Android izinleri ve sürüm ayarlandı');
+// Gradle indirmesi için zaman aşımını uzat (varsayılan 10 sn bazen yetmiyor)
+const w='android/gradle/wrapper/gradle-wrapper.properties';let wp=fs.readFileSync(w,'utf8');
+wp=/networkTimeout=/.test(wp)?wp.replace(/networkTimeout=\d+/,'networkTimeout=180000'):wp+'\nnetworkTimeout=180000\n';fs.writeFileSync(w,wp);
+console.log('Android izinleri, sürüm ve indirme süresi ayarlandı');
