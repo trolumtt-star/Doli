@@ -12,9 +12,9 @@ SHEETS.wallet=function(){
   const b=balance(),items=ledgerItems(),pend=Object.values(D.payouts).find(p=>p.status==='pending');
   sheet('Kumbaram',`
    <div class="jar" style="flex-direction:column;align-items:stretch">
-     <div class="row"><span class="coin" style="--s:56px"><span class="face">1₺</span></span><div class="grow"><div class="s" style="color:#6b5208">Bakiye</div><div class="amt">${tl(b)}</div></div></div>
+     <div class="row"><span class="coin" style="--s:56px"><span class="face">1₺</span></span><div class="grow"><div class="s" style="color:var(--money-ink)">Bakiye</div><div class="amt">${tl(b)}</div></div></div>
      <div class="meter"><i style="width:${Math.min(100,b/CFG.payoutAt*100)}%"></i></div>
-     <div class="s" style="color:#6b5208;margin-top:6px">${b>=CFG.payoutAt?'Google Play kodu almaya hazırsın':`Google Play koduna ${tl(CFG.payoutAt-b)} kaldı`}</div>
+     <div class="s" style="color:var(--money-ink);margin-top:6px">${b>=CFG.payoutAt?'Google Play kodu almaya hazırsın':`Google Play koduna ${tl(CFG.payoutAt-b)} kaldı`}</div>
    </div>
    <div class="kpis" style="margin-top:12px"><div><b>${tl((D.wallet&&D.wallet.earned)||0)}</b><span>video ödülleri</span></div><div><b>${tl(received())}</b><span>gelen hediye</span></div><div><b>${tl(sentTotal())}</b><span>harcanan</span></div></div>
    ${pend?`<div class="result warn"><h4>Kod talebin alındı</h4><p>${tl(pend.amount)} değerinde Google Play kodu hazırlanıyor.</p></div>`:

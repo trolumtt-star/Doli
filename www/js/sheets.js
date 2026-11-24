@@ -57,8 +57,8 @@ SHEETS.comments=function(id,live){
    ${CM.mode==='sticker'?`<div class="sticker-row">${STICKERS.map(s=>`<button onclick="addComment('${esc(id)}','sticker','${s}')">${s}</button>`).join('')}</div>`:''}
    ${CM.mode==='poll'?`<input class="field" id="pollO1" placeholder="1. seçenek" maxlength="40" style="height:40px;margin-bottom:6px"><input class="field" id="pollO2" placeholder="2. seçenek" maxlength="40" style="height:40px;margin-bottom:6px">`:''}
    <form class="row" onsubmit="event.preventDefault();addComment('${esc(id)}',CM.mode==='poll'?'poll':'text')">
-    <button type="button" class="round" style="background:#E9EBF0;width:40px;height:40px" aria-label="Sticker" onclick="CM.mode=CM.mode==='sticker'?'text':'sticker';SHEETS.comments('${esc(id)}',true)">😊</button>
-    <button type="button" class="round" style="background:#E9EBF0;width:40px;height:40px;font-size:14px;font-weight:800" aria-label="Anket" onclick="CM.mode=CM.mode==='poll'?'text':'poll';SHEETS.comments('${esc(id)}',true)">%</button>
+    <button type="button" class="round" style="background:var(--soft);width:40px;height:40px" aria-label="Sticker" onclick="CM.mode=CM.mode==='sticker'?'text':'sticker';SHEETS.comments('${esc(id)}',true)">😊</button>
+    <button type="button" class="round" style="background:var(--soft);width:40px;height:40px;font-size:14px;font-weight:800" aria-label="Anket" onclick="CM.mode=CM.mode==='poll'?'text':'poll';SHEETS.comments('${esc(id)}',true)">%</button>
     <input class="field" id="cmIn" maxlength="300" placeholder="${CM.mode==='poll'?'Anket sorusu':'Yorum ekle, @ ile birinden bahset'}" autocomplete="off" style="height:44px"><button class="btn primary" style="height:44px;padding:0 14px">Gönder</button></form>`);
   if(keep)$('#cmIn').value=keep;
 };
@@ -84,7 +84,7 @@ SHEETS.share=function(id){
   sheet('Paylaş',`
    ${on?'':`<div class="row" style="margin-bottom:14px"><input class="field" id="rpNote" maxlength="120" placeholder="Repost notu ekle (isteğe bağlı)"></div>`}
    <div class="share-grid">
-   <button onclick="toggleRepost('${esc(id)}',$('#rpNote')&&$('#rpNote').value)"><span class="ic" style="${on?'':'background:var(--ink);color:#fff;border-color:var(--ink)'}">${I.repost}</span>${on?'Repostu geri al':'Repostla'}</button>
+   <button onclick="toggleRepost('${esc(id)}',$('#rpNote')&&$('#rpNote').value)"><span class="ic" style="${on?'':'background:var(--inv);color:var(--inv-text);border-color:var(--inv)'}">${I.repost}</span>${on?'Repostu geri al':'Repostla'}</button>
    <button onclick="openSheet('sendTo','${esc(id)}')"><span class="ic">${I.send}</span>Mesajla gönder</button>
    <button onclick="copyLink('${esc(id)}')"><span class="ic">${I.link}</span>Bağlantıyı kopyala</button>
    <button onclick="openSheet('colls','${esc(id)}')"><span class="ic">${I.bookmarkO}</span>Koleksiyona ekle</button>
@@ -133,13 +133,13 @@ SHEETS.user=function(uid){
 SHEETS.sound=function(sid){
   const src=vById(sid);if(!src)return sheet('Ses','<div class="empty"><h3>Ses bulunamadı</h3></div>');
   const users=allVideos().filter(v=>v.id===sid||v.soundOf===sid||(!src.real&&!v.real&&v.sound===src.sound));
-  sheet('Ses',`<div class="row" style="gap:14px"><span class="ava" style="width:72px;height:72px;border-radius:14px;background:var(--ink);color:#fff">${I.sound.replace('<svg','<svg width="34" height="34"')}</span><div class="grow"><div class="b" style="font-size:18px">${esc(src.sound)}</div><div class="s muted">${users.length} video bu sesi kullanıyor</div></div></div>
+  sheet('Ses',`<div class="row" style="gap:14px"><span class="ava" style="width:72px;height:72px;border-radius:14px;background:var(--surface-2);color:var(--ink)">${I.sound.replace('<svg','<svg width="34" height="34"')}</span><div class="grow"><div class="b" style="font-size:18px">${esc(src.sound)}</div><div class="s muted">${users.length} video bu sesi kullanıyor</div></div></div>
    ${src.real?`<button class="btn primary full" style="margin-top:14px" onclick="closeSheet();openUpload({soundOf:'${esc(sid)}'})">Bu sesi kullan</button>`:`<p class="help" style="margin-top:12px">Örnek videoların sesi kullanılamaz. Gerçek yüklenen videoların sesini kendi videonda kullanabilirsin.</p>`}
    <div class="grid" style="margin-top:16px">${users.map(tileHTML).join('')}</div>`);
 };
 SHEETS.chain=function(prompt){
   const list=allVideos().filter(v=>v.addYours===prompt);
-  sheet('Senin sıran',`<div class="card" style="background:var(--brass-tint);border-color:#f0dd9e"><div class="b" style="font-size:18px">${esc(prompt)}</div><div class="s muted" style="margin-top:4px">${list.length} kişi katıldı</div></div>
+  sheet('Senin sıran',`<div class="card" style="background:var(--brass-tint);border-color:var(--money-line)"><div class="b" style="font-size:18px">${esc(prompt)}</div><div class="s muted" style="margin-top:4px">${list.length} kişi katıldı</div></div>
    <button class="btn primary full" style="margin-top:12px" onclick="closeSheet();openUpload({addYours:${JSON.stringify(prompt).replace(/"/g,'&quot;')}})">Sen de katıl</button>
    <div class="grid" style="margin-top:16px">${list.map(tileHTML).join('')}</div>`);
 };
