@@ -46,9 +46,15 @@
         if(!/^\S+@\S+\.\S+$/.test(e))return draw('Geçerli bir e-posta yaz.');
         if(p.length<6)return draw('Şifre en az 6 karakter olmalı.');
         const b=w.querySelector('#auGo');b.disabled=true;b.textContent='Bekle';
-        const r=mode==='signup'?await sb.auth.signUp({email:e,password:p}):await sb.auth.signInWithPassword({email:e,password:p});
-        if(r.error){const m=r.error.message||'';return draw(/Invalid login/i.test(m)?'E-posta ya da şifre yanlış.':/registered/i.test(m)?'Bu e-postayla zaten hesap var. Giriş yap.':/confirm/i.test(m)?'Önce e-postana gelen doğrulama bağlantısına tıkla.':m)}
-        if(!r.data.session){mode='signin';return draw('Kayıt tamam. E-postana gelen doğrulama bağlantısına tıkla, sonra burada giriş yap.','ok')}
+        let r=mode==='signup'?await sb.auth.signUp({email:e,password:p}):await sb.auth.signInWithPassword({email:e,password:p});
+        // E-posta doğrulaması sunucuda otomatik yapılıyor: kayıttan sonra oturum gelmezse doğrudan giriş yap
+        if(mode==='signup'&&(!r.data||!r.data.session)&&(!r.error||/rate limit|sending|confirm/i.test(r.error.message||''))){
+          await new Promise(x=>setTimeout(x,600));
+          const r2=await sb.auth.signInWithPassword({email:e,password:p});
+          if(!r2.error)r=r2;
+        }
+        if(r.error){const m=r.error.message||'';return draw(/Invalid login/i.test(m)?'E-posta ya da şifre yanlış.':/registered/i.test(m)?'Bu e-postayla zaten hesap var. Giriş yap.':/confirm/i.test(m)?'Hesap doğrulanamadı. Birkaç saniye sonra Giriş yap ile tekrar dene.':/rate limit/i.test(m)?'Çok fazla deneme oldu. Bir dakika sonra Giriş yap ile tekrar dene.':m)}
+        if(!r.data.session){mode='signin';return draw('Kayıt tamam. Şimdi aynı bilgilerle giriş yap.','ok')}
         session=r.data.session;w.remove();done();
       };
     };
