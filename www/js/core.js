@@ -233,3 +233,6 @@ function soft(kind){
   },150);
 }
 const LIVE_SHEETS=['comments','wallet','user'];
+
+// animasyonu yeniden tetikler: sınıfı kaldır, reflow, tekrar ekle
+function anim(el,cls){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),600)}

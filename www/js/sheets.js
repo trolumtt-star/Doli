@@ -101,6 +101,7 @@ SHEETS.more=function(id){
    <button class="list-btn" onclick="openSheet('report','${esc(id)}')">${I.flag}Şikayet et${I.chev}</button>
    <button class="list-btn" onclick="openSheet('footnotes','${esc(id)}')">${I.note2}Bağlam notları${I.chev}</button>
    ${me?`<button class="list-btn" onclick="openSheet('promote','${esc(id)}')">${I.rocket}Öne çıkar${I.chev}</button>`:''}
+   ${me&&v.real?`<button class="list-btn danger" onclick="deleteMine('${esc(id)}')">${I.block}Videoyu sil</button>`:''}
    ${me?'':`<button class="list-btn" onclick="toggleMute('${esc(v.owner)}')">${I.volOff.replace(/#fff/g,'currentColor')}@${esc(p.handle)} ${D.prefs.muted[v.owner]?'sessizden çıkar':'sessize al'}</button>
    <button class="list-btn danger" onclick="blockUser('${esc(v.owner)}')">${I.block}@${esc(p.handle)} hesabını engelle</button>`}
   </div>
@@ -278,7 +279,7 @@ SHEETS.settings=function(){
    ${App.admin?`<div class="group" style="margin-top:12px">
     <button class="list-btn" onclick="openSheet('admin')">${I.shield}Yönetici paneli${I.chev}</button>
     <button class="list-btn" onclick="openSheet('advertiser')">${I.mega}Reklam veren paneli${I.chev}</button></div>`:''}
-   ${window.APP_LOGOUT?`<button class="btn soft full" style="margin-top:12px" onclick="window.APP_LOGOUT()">Çıkış yap</button>`:''}
+   ${window.APP_SWITCH?`<div class="group" style="margin-top:12px"><button class="list-btn" onclick="window.APP_SWITCH()">${I.users}Hesap değiştir${I.chev}</button><button class="list-btn danger" onclick="window.APP_LOGOUT()">${I.block}Çıkış yap</button></div>`:''}
    <p class="help" style="margin-top:16px">${App.online?'Verilerin kaydediliyor.':'Bu görünümde veritabanına bağlanılamadı. Yaptıkların kaydedilmiyor.'}</p>`);
 };
 function setMe(path,val){if(!D.me)return;D.me.set=D.me.set||{};if(path==='private')D.me.private=val;else D.me.set[path]=val;D.profiles[App.uid]=D.me;saveProfile()}
@@ -325,3 +326,9 @@ SHEETS.kvkk=()=>sheet('KVKK aydınlatma metni',`<div style="font-size:14.5px;lin
    <p><b>Reklam verenler.</b> Kimliğin paylaşılmaz. Yalnızca toplu ve anonim kitle sayıları gösterilir.</p><br>
    <p><b>Hakların.</b> Verilerine erişme, düzeltme, silme ve rızanı geri çekme hakkın var.</p><br>
    <p class="muted s">Bu metin taslaktır. Yayına almadan önce bir avukata kontrol ettir.</p></div>`);
+
+async function deleteMine(id){
+  closeSheet();if(!App.db)return;
+  try{await App.db.doc(`feed/${id}`).delete();const u=D.myUploads[id];if(u)await App.db.doc(`uploads/${App.uid}/items/${id}`).set({...u,status:'rejected',reason:'Sen sildin'});delete D.feed[id];allVideos.dirty=true;toast('Video silindi');buildFeed()}
+  catch(e){toast('Silinemedi')}
+}

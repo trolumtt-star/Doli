@@ -2,7 +2,7 @@
 /* ================================================================
    SABİTLER VE ÖRNEK İÇERİK
    ================================================================ */
-const CFG={reward:1,dailyUpload:5,dailyReward:3,viewBonusAt:1000,viewBonus:5,payoutAt:50,budget:10000,maxMB:window.APP_MAXMB||20,storyHours:24,promoteHours:24};
+const CFG={reward:1,dailyUpload:5,dailyReward:3,viewBonusAt:1000,viewBonus:5,payoutAt:50,budget:10000,maxMB:window.APP_MAXMB||20,storyHours:24,promoteHours:24,autoApprove:true};
 const CATS=[
  {id:1,slug:'komedi',name:'Komedi',e:'😂'},{id:2,slug:'oyun',name:'Oyun',e:'🎮'},{id:3,slug:'muzik',name:'Müzik',e:'🎵'},
  {id:4,slug:'dans',name:'Dans',e:'💃'},{id:5,slug:'yemek',name:'Yemek',e:'🍳'},{id:6,slug:'spor',name:'Spor',e:'⚽'},

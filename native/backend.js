@@ -23,15 +23,21 @@
     });
   });
   sb.auth.onAuthStateChange((ev,s)=>{session=s;if(ev==='SIGNED_OUT')location.reload()});
-  window.APP_LOGOUT=async()=>{await sb.auth.signOut();try{localStorage.clear()}catch{}location.reload()};
+  const ACC='doli.accounts';
+  const savedAccounts=()=>{try{return JSON.parse(localStorage.getItem(ACC)||'[]')}catch{return []}};
+  const remember=e=>{try{const a=savedAccounts().filter(x=>x!==e);a.unshift(e);localStorage.setItem(ACC,JSON.stringify(a.slice(0,5)))}catch{}};
+  const wipe=()=>{try{const keep=localStorage.getItem(ACC);localStorage.clear();if(keep)localStorage.setItem(ACC,keep)}catch{}};
+  window.APP_LOGOUT=async()=>{await sb.auth.signOut();wipe();location.reload()};
+  window.APP_SWITCH=async()=>{await sb.auth.signOut();wipe();localStorage.setItem('doli.mode','signin');location.reload()};
   function showAuth(done){
     const w=document.createElement('div');
     w.className='onb';w.style.zIndex=120;
-    let mode='signup';
+    let mode=localStorage.getItem('doli.mode')||(savedAccounts().length?'signin':'signup');localStorage.removeItem('doli.mode');
     const draw=(msg='',kind='')=>{
       w.innerHTML=`<div class="hero"><span class="coin" style="--s:72px"><span class="face">1₺</span></span></div>
        <h1>${mode==='signup'?'Hesap oluştur':'Tekrar hoş geldin'}</h1>
        <p class="lead">${mode==='signup'?'Kısa videolar izle, kendi videonla kazan.':'E-posta ve şifrenle giriş yap.'}</p>
+       ${mode==='signin'&&savedAccounts().length?`<div class="lbl">Kayıtlı hesaplar</div><div class="chips wrapx">${savedAccounts().map(a=>`<button class="chip" data-acc="${a.replace(/[<>"&]/g,'')}">${a.replace(/[<>"&]/g,'')}</button>`).join('')}</div>`:''}
        <label class="lbl" for="auE">E-posta</label><input class="field" id="auE" type="email" autocomplete="email" inputmode="email" autocapitalize="off">
        <label class="lbl" for="auP">Şifre</label><input class="field" id="auP" type="password" autocomplete="${mode==='signup'?'new-password':'current-password'}" placeholder="En az 6 karakter">
        ${msg?`<div class="result ${kind||'bad'}" style="margin-top:14px"><p style="margin:0">${msg}</p></div>`:''}
@@ -40,6 +46,7 @@
        <button class="btn full" style="margin-top:6px;color:var(--muted)" id="auSw">${mode==='signup'?'Hesabın var mı? Giriş yap':'Hesabın yok mu? Kayıt ol'}</button>
        ${mode==='signin'?'<button class="btn full" style="color:var(--muted)" id="auFg">Şifremi unuttum</button>':''}`;
       w.querySelector('#auSw').onclick=()=>{mode=mode==='signup'?'signin':'signup';draw()};
+      w.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{w.querySelector('#auE').value=b.dataset.acc;w.querySelector('#auP').focus()});
       const fg=w.querySelector('#auFg');if(fg)fg.onclick=async()=>{const e=w.querySelector('#auE').value.trim();if(!e)return draw('Önce e-posta adresini yaz.');const {error}=await sb.auth.resetPasswordForEmail(e);draw(error?error.message:'Şifre sıfırlama bağlantısı e-postana gönderildi.',error?'bad':'ok')};
       w.querySelector('#auGo').onclick=async()=>{
         const e=w.querySelector('#auE').value.trim(),p=w.querySelector('#auP').value;
@@ -55,7 +62,7 @@
         }
         if(r.error){const m=r.error.message||'';return draw(/Invalid login/i.test(m)?'E-posta ya da şifre yanlış.':/registered/i.test(m)?'Bu e-postayla zaten hesap var. Giriş yap.':/confirm/i.test(m)?'Hesap doğrulanamadı. Birkaç saniye sonra Giriş yap ile tekrar dene.':/rate limit/i.test(m)?'Çok fazla deneme oldu. Bir dakika sonra Giriş yap ile tekrar dene.':m)}
         if(!r.data.session){mode='signin';return draw('Kayıt tamam. Şimdi aynı bilgilerle giriş yap.','ok')}
-        session=r.data.session;w.remove();done();
+        session=r.data.session;remember(e);w.remove();done();
       };
     };
     draw();

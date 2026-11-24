@@ -4,13 +4,26 @@
    ================================================================ */
 let ADM={tab:'queue',uploads:[],reports:[],payouts:[],wallets:{}};
 const strip=o=>{const {uid,id,...r}=o;return r};
+function feedFromUpload(uid,u){const keys=['type','assetId','assetIds','thumbId','cap','cat','game','dur','phash','createdAt','edit','duetOf','stitchOf','stitchSec','soundOf','soundName','replyTo','addYours','aiLabel','productId','playlistId','city','scheduledAt','visibility'];
+  const f={owner:uid,approvedAt:now()};for(const k of keys)if(u[k]!==undefined&&u[k]!==null)f[k]=u[k];return f}
+async function grantAutoRewards(){ // otomatik onaylanan gönderilerin 1 ₺ ödülleri
+  for(const u of ADM.uploads.filter(x=>x.status==='approved'&&x.autoApproved).sort((a,b)=>a.createdAt-b.createdAt)){
+    const w=ADM.wallets[u.uid]||{balance:0,earned:0,items:[]};const items=w.items||[];
+    if(items.some(i=>i.kind==='upload'&&i.vid===u.id))continue;
+    const day=new Date(u.createdAt);day.setHours(0,0,0,0);const sameDay=items.filter(i=>i.kind==='upload'&&i.at>=day.getTime()&&i.at<day.getTime()+864e5).length;
+    const spent=Object.values(ADM.wallets).reduce((a,x)=>a+(x.earned||0),0);
+    if(sameDay>=CFG.dailyReward||spent+CFG.reward>CFG.budget)continue;
+    const nw={balance:(w.balance||0)+CFG.reward,earned:(w.earned||0)+CFG.reward,items:[...items,{kind:'upload',vid:u.id,amount:CFG.reward,note:'Yayınlanan video ödülü',at:now()}].slice(-200)};
+    try{await App.db.doc(`wallet/${u.uid}`).set(nw);ADM.wallets[u.uid]=nw}catch(e){dbErr(e)}
+  }
+}
 async function loadAdmin(){
   const db=App.db;const uids=[...new Set([...Object.keys(D.profiles),App.uid])];
   const get=async p=>{try{const s=await db.collection(p).get();return s.docs.map(d=>({id:d.id,...d.data()}))}catch{return []}};
   const [ups,reps,pays]=await Promise.all(['uploads/%/items','reports/%/items','payouts/%/req'].map(t=>Promise.all(uids.map(u=>get(t.replace('%',u)).then(l=>l.map(x=>({...x,uid:u})))))));
   ADM.uploads=ups.flat().sort((a,b)=>b.createdAt-a.createdAt);ADM.reports=reps.flat().sort((a,b)=>b.at-a.at);ADM.payouts=pays.flat().sort((a,b)=>b.at-a.at);
   ADM.wallets=Object.fromEntries((await get('wallet')).map(w=>[w.id,w]));
-  await grantViewBonuses();
+  await grantViewBonuses();await grantAutoRewards();
 }
 async function grantViewBonuses(){
   for(const [vid,f] of Object.entries(D.feed)){
@@ -51,9 +64,7 @@ SHEETS.admin=async function(arg,live){
 async function approve(uid,id){
   const u=ADM.uploads.find(x=>x.uid===uid&&x.id===id);if(!u)return;
   try{
-    const keys=['type','assetId','assetIds','thumbId','cap','cat','game','dur','phash','createdAt','edit','duetOf','stitchOf','stitchSec','soundOf','soundName','replyTo','addYours','aiLabel','productId','playlistId','city','scheduledAt','visibility'];
-    const f={owner:uid,approvedAt:now()};for(const k of keys)if(u[k]!==undefined&&u[k]!==null)f[k]=u[k];
-    await App.db.doc(`feed/${id}`).set(f);
+    await App.db.doc(`feed/${id}`).set(feedFromUpload(uid,u));
     await App.db.doc(`uploads/${uid}/items/${id}`).set({...strip(u),status:'approved',reviewedAt:now()});
     const w=await App.db.doc(`wallet/${uid}`).get();const cw=w.exists?w.data():{balance:0,earned:0,items:[]};
     const today=(cw.items||[]).filter(i=>i.kind==='upload'&&i.at>=dayStart()).length;

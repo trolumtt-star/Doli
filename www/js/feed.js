@@ -103,7 +103,7 @@ function slideHTML(v,i){
    <div class="rail">
      <div class="creator"><button onclick="openSheet('user','${esc(v.owner)}')" aria-label="${esc(p.handle)} profili">${avaHTML(p)}</button>
        ${me?'':`<button class="fol ${iFollow(v.owner)?'done':''}" data-fol="${esc(v.owner)}" onclick="toggleFollow('${esc(v.owner)}')" aria-label="${iFollow(v.owner)?'Takibi bırak':'Takip et'}">${iFollow(v.owner)?I.check:I.plus}</button>`}</div>
-     <button class="rb like" aria-pressed="${liked}" aria-label="Beğen" onclick="toggleLike('${esc(v.id)}')">${I.heart}<span data-c="like">${fmt(likeCount(v))}</span></button>
+     <button class="rb like" data-id="${esc(v.id)}" aria-pressed="${liked}" aria-label="Beğen" onclick="toggleLike('${esc(v.id)}')">${I.heart}<span data-c="like">${fmt(likeCount(v))}</span></button>
      <button class="rb" aria-label="Yorumlar" onclick="openSheet('comments','${esc(v.id)}')">${I.bubble}<span data-c="cm">${fmt(commentCount(v))}</span></button>
      <button class="rb save" aria-pressed="${saved}" aria-label="Kaydet" onclick="toggleSave('${esc(v.id)}')">${I.bookmark}<span data-c="save">${fmt(saveCount(v))}</span></button>
      ${me?'':`<button class="rb gift" aria-label="Hediye gönder" onclick="openSheet('gift',{to:'${esc(v.owner)}',vid:'${esc(v.id)}'})">${I.gift}<span>Hediye</span></button>`}
@@ -218,7 +218,7 @@ function burst(s,ev){
 }
 function updateMuteBtn(){const it=feedItems[active],b=$('#muteBtn');const show=currentScreen()==='home'&&!!(it&&it.v&&it.v.real);b.style.visibility=show?'visible':'hidden';b.innerHTML=UI.muted?I.volOff:I.volOn;b.setAttribute('aria-label',UI.muted?'Sesi aç':'Sesi kapat')}
 $('#muteBtn').onclick=()=>{UI.muted=!UI.muted;const el=cur(),it=feedItems[active];vidsIn(el).forEach(v=>{if(v.classList.contains('snd'))v.muted=UI.muted;else if(v.dataset.role==='ref'&&!el.querySelector('.stitch-ref'))v.muted=true;else if(it&&it.v&&it.v.soundOf)v.muted=true;else v.muted=UI.muted});updateMuteBtn()};
-function setFeed(t){UI.feedType=t;$$('.feed-tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.feed===t));buildFeed()}
+function setFeed(t){UI.feedType=t;anim($('#feed'),'swap');$$('.feed-tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.feed===t));buildFeed()}
 $$('.feed-tabs button').forEach(b=>b.onclick=()=>setFeed(b.dataset.feed));
 
 /* ekran süresi */
@@ -227,7 +227,7 @@ function addUsage(ms){if(!D.prefs.usage||D.prefs.usage.d!==dayKey())D.prefs.usag
 
 /* ---------------- etkileşimler ---------------- */
 function needAccount(){if(!D.prefs.termsAt){showOnboarding();return true}return false}
-function toggleLike(id){if(needAccount())return;if(local.likes.m[id])delete local.likes.m[id];else local.likes.m[id]=now();saveOwn('likes');refreshCounts()}
+function toggleLike(id){if(needAccount())return;if(local.likes.m[id])delete local.likes.m[id];else local.likes.m[id]=now();saveOwn('likes');refreshCounts();$$(`.rb.like[data-id="${id}"]`).forEach(b=>anim(b,'pop'))}
 function toggleSave(id){
   if(needAccount())return;
   const on=!D.prefs.saves[id];on?D.prefs.saves[id]=now():delete D.prefs.saves[id];savePrefs(0);

@@ -187,9 +187,17 @@ async function runPipeline(draft){
       city:(D.me&&D.me.city)||'',scheduledAt:sch>now()?sch:0,visibility:UP.visibility||'all',
       ai:ai&&!ai.unavailable?{safe:ai.safe,category_ok:ai.category_ok,game_ok:ai.game_ok??null,detected_game:ai.detected_game||null,confidence:ai.confidence||null,summary:ai.summary||'',issues:ai.issues||[]}:(draft?null:{unavailable:true}),createdAt:now()};
     if(App.db)await App.db.doc(`uploads/${App.uid}/items/${vid}`).set(rec);else D.myUploads[vid]={...rec,localUrl:UP.url};
+    // Test modu: kontrollerden geçen gönderi doğrudan yayına girer (ödül yönetici panelinde dağıtılır)
+    let live=false;
+    if(CFG.autoApprove&&!draft&&status==='pending'&&App.db){
+      try{await App.db.doc(`feed/${vid}`).set(feedFromUpload(App.uid,rec));await App.db.doc(`uploads/${App.uid}/items/${vid}`).set({...rec,status:'approved',autoApproved:true,reviewedAt:now()});live=true}
+      catch(e){console.warn('otomatik onay yapılamadı',e)}
+    }
     if(UP.playlistId&&!draft){const pl=local.playlists.list.find(p=>p.id===UP.playlistId);if(pl&&!pl.vids.includes(vid)){pl.vids.push(vid);saveOwn('playlists')}}
     if(draft){finish('ok','Taslak kaydedildi','Profilindeki Taslaklar sekmesinden açıp gönderebilirsin.',`<button class="btn soft full" style="margin-top:12px" onclick="closeSheet();UI.pfTab='drafts';go('profile')">Taslaklara git</button>`);resetUP();return}
     if(status==='rejected')finish('bad','Gönderi reddedildi',esc(reason)+'. Bu gönderi için ödül verilmez.',`<button class="btn soft full" style="margin-top:12px" onclick="resetUP();openUpload()">Başka gönderi yükle</button>`);
+    else if(live)finish('ok','Yayında',`Gönderin akışa eklendi.${rec.scheduledAt?' Belirlediğin saatte görünür olacak.':''} ${tl(CFG.reward)} ödülün yönetici onayıyla kumbarana geçer.`,
+      `<button class="btn primary full" style="margin-top:12px" onclick="closeSheet();playFrom('${vid}')">Gönderini izle</button><button class="btn soft full" style="margin-top:8px" onclick="closeSheet();go('profile')">Profilime git</button>`);
     else finish('ok','İncelemeye alındı',`Otomatik kontrollerden geçti. Yönetici onayladığında ${rec.scheduledAt?'belirlediğin saatte ':''}yayına girer ve kumbarana ${tl(CFG.reward)} eklenir.`,
       `${App.admin?`<button class="btn dark full" style="margin-top:12px" onclick="openSheet('admin')">Yönetici olarak incele</button>`:''}<button class="btn soft full" style="margin-top:8px" onclick="closeSheet();go('profile')">Profilime git</button>`);
     resetUP();

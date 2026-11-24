@@ -133,13 +133,13 @@ function go(name,opt={}){
   $$('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+name));
   $$('.nav>button[data-go]').forEach(b=>{if(b.dataset.go===name)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
   $('#nav').classList.toggle('on-video',name==='home');
-  $('meta[name=theme-color]').content=name==='home'?'#000000':'#09080D';
+  $('meta[name=theme-color]').content=name==='home'?'#000000':'#FFFFFF';
   if(name==='home')buildFeed();else updateMuteBtn();
   if(name==='discover'){renderDiscover();if(opt.focus)setTimeout(()=>$('#q').focus(),50)}
   if(name==='inbox'){renderInbox();const mx=Math.max(0,...notifications().map(n=>n.at));if(mx>(D.prefs.seenNotifs||0))setTimeout(()=>{D.prefs.seenNotifs=mx;savePrefs();renderBadge()},1200)}
   if(name==='profile')renderProfile();
 }
-$$('.nav>button[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+$$('.nav>button[data-go]').forEach(b=>b.onclick=()=>{anim(b,'bounce');go(b.dataset.go)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(currentScreen()==='home'&&active>=0&&!paused)togglePause(cur());commitWatch();savePrefs(0)}});
 async function boot(){
   await connect();
