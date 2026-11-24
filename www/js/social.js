@@ -167,7 +167,7 @@ function showStory(){
   storyStop();const uid=STORY.users[STORY.ui];if(!uid)return closeLayers();const items=activeStories(uid);const s=items[STORY.si];if(!s){STORY.ui++;STORY.si=0;return showStory()}
   const p=person(uid);D.prefs.storySeen=D.prefs.storySeen||{};D.prefs.storySeen[uid]=Math.max(D.prefs.storySeen[uid]||0,s.at);savePrefs();
   const L=$('#storyLayer');
-  L.innerHTML=`<div class="sv-media" style="background:${esc(s.bg||'#111')}">${s.asset?(s.type==='video'?`<video src="${blobUrl(s.asset)}" autoplay playsinline ${UI.muted?'muted':''}></video>`:`<img src="${blobUrl(s.asset)}" alt="">`):''}${s.text?`<div class="sv-text">${esc(s.text)}</div>`:''}</div>
+  L.innerHTML=`<div class="sv-media" style="background:${esc(s.bg||'#111')}">${s.asset?(s.type==='video'?`<video src="${blobUrl(s.asset)}" autoplay playsinline poster="${BLANK}" ${UI.muted?'muted':''}></video>`:`<img src="${blobUrl(s.asset)}" alt="">`):''}${s.text?`<div class="sv-text">${esc(s.text)}</div>`:''}</div>
    <div class="sv-bars">${items.map((_,i)=>`<i><b style="width:${i<STORY.si?100:0}%"></b></i>`).join('')}</div>
    <div class="sv-top">${avaHTML(p)}<div class="grow"><div class="b">@${esc(p.handle)}${p.sample?' <span class="flag">Örnek</span>':''}</div><div class="xs" style="opacity:.75">${ago(s.at)}</div></div><button class="back" aria-label="Kapat" onclick="closeLayers()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <button class="sv-tap" style="left:0" aria-label="Önceki" onclick="storyNav(-1)"></button><button class="sv-tap" style="right:0" aria-label="Sonraki" onclick="storyNav(1)"></button>

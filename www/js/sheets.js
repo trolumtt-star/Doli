@@ -215,7 +215,7 @@ async function leaveShared(id){const s=D.shared[id];try{const m=s.members.filter
 /* ---------------- yardımcı işlemler ---------------- */
 function tileHTML(v){
   const st=v.status&&v.status!=='approved'?`<span class="status ${v.status}">${{pending:'İncelemede',rejected:'Reddedildi',draft:'Taslak',scheduled:'Zamanlandı'}[v.status]||''}</span>`:(v.scheduledAt&&v.scheduledAt>now()?'<span class="status pending">Zamanlandı</span>':'');
-  const inner=v.thumb?`<img src="${esc(v.thumb)}" alt="" loading="lazy">`:v.imgs&&v.imgs.length?`<img src="${esc(v.imgs[0])}" alt="" loading="lazy">`:v.src?`<video src="${esc(v.src)}" muted preload="metadata"></video>`:v.tpl?`<div class="mini">${sceneHTML(v)}</div>`:'';
+  const inner=v.thumb?`<img src="${esc(v.thumb)}" alt="" loading="lazy">`:v.imgs&&v.imgs.length?`<img src="${esc(v.imgs[0])}" alt="" loading="lazy">`:v.src?`<video src="${esc(v.src)}" poster="${BLANK}" muted preload="metadata"></video>`:v.tpl?`<div class="mini">${sceneHTML(v)}</div>`:'';
   return `<button class="tile" onclick="playFrom('${esc(v.id)}')" aria-label="${esc(v.cap||'Video')}">${inner}${st}<span class="plays">${I.eye}${fmt(viewCount(v))}</span></button>`;
 }
 function copyLink(id){

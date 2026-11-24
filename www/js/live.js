@@ -52,7 +52,7 @@ async function joinLive(host){
 }
 function renderLive(){
   const host=LIVE.host,l=D.lives[host]||{},p=person(host),v=l.vid&&vById(l.vid),me=host===App.uid;
-  $('#liveLayer').innerHTML=`<div class="live-wrap"><div class="media">${v?(v.real?`<video class="vid ${'f-'+((v.edit&&v.edit.filter)||'none')}" src="${esc(v.src)}" autoplay loop playsinline ${UI.muted?'muted':''}></video>`:sceneHTML(v)):`<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,${esc(p.c)},#000 75%)"></div><div style="position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-size:120px">${esc(p.e)}</div>`}</div><div class="fade"></div>
+  $('#liveLayer').innerHTML=`<div class="live-wrap"><div class="media">${v?(v.real?`<video class="vid ${'f-'+((v.edit&&v.edit.filter)||'none')}" src="${esc(v.src)}" autoplay loop playsinline poster="${BLANK}" ${UI.muted?'muted':''}></video>`:sceneHTML(v)):`<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,${esc(p.c)},#000 75%)"></div><div style="position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-size:120px">${esc(p.e)}</div>`}</div><div class="fade"></div>
    <div class="live-top" id="liveTop"></div><div class="match" id="liveMatch"></div>
    <div class="live-chat" id="liveChat" aria-live="polite"></div><div class="hearts" id="hearts"></div>
    <form class="live-bottom" onsubmit="event.preventDefault();liveSend()"><input id="lvIn" maxlength="200" placeholder="${LIVE.room||!App.room?'Bir şey yaz':'Bağlanıyor'}" autocomplete="off">

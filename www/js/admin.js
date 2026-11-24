@@ -31,7 +31,7 @@ SHEETS.admin=async function(arg,live){
   const tabs=[['queue',`Onay (${pend.length})`],['reports',`Şikayet (${openR.length})`],['payouts',`Ödeme (${pendP.length})`]];
   let body='';
   if(ADM.tab==='queue')body=pend.length?pend.map(u=>{const p=person(u.uid),g=u.game&&game(u.game);
-    const pv=u.type==='photos'?`<img src="${blobUrl(esc((u.assetIds||[])[0]))}" alt="" style="width:100%;height:100%;object-fit:cover">`:u.assetId?`<video src="${blobUrl(esc(u.assetId))}" ${u.thumbId?`poster="${blobUrl(esc(u.thumbId))}"`:''} controls muted playsinline preload="none" class="f-${esc((u.edit&&u.edit.filter)||'none')}"></video>`:'';
+    const pv=u.type==='photos'?`<img src="${blobUrl(esc((u.assetIds||[])[0]))}" alt="" style="width:100%;height:100%;object-fit:cover">`:u.assetId?`<video src="${blobUrl(esc(u.assetId))}" poster="${u.thumbId?blobUrl(esc(u.thumbId)):BLANK}" controls muted playsinline preload="none" class="f-${esc((u.edit&&u.edit.filter)||'none')}"></video>`:'';
     const extra=[u.type==='photos'?`${(u.assetIds||[]).length} fotoğraf`:null,u.duetOf?'Düet':null,u.stitchOf?'Stitch':null,u.soundOf?'Ses kullanımı':null,u.replyTo?'Yorum yanıtı':null,u.addYours?'Senin sıran':null,u.aiLabel?'Yapay zekâ etiketi':null,u.scheduledAt?'Zamanlı: '+new Date(u.scheduledAt).toLocaleString('tr-TR'):null].filter(Boolean);
     return `<div class="q"><div class="pv">${pv}</div><div class="grow">
      <div class="b">@${esc(p.handle)}</div><div class="s muted" style="margin:2px 0 6px">${cat(u.cat).name}${g?', '+esc(g.name):''} · ${ago(u.createdAt)}</div>
@@ -51,7 +51,7 @@ SHEETS.admin=async function(arg,live){
 async function approve(uid,id){
   const u=ADM.uploads.find(x=>x.uid===uid&&x.id===id);if(!u)return;
   try{
-    const keys=['type','assetId','assetIds','thumbId','cap','cat','game','dur','phash','createdAt','edit','duetOf','stitchOf','stitchSec','soundOf','soundName','replyTo','addYours','aiLabel','productId','playlistId','city','scheduledAt'];
+    const keys=['type','assetId','assetIds','thumbId','cap','cat','game','dur','phash','createdAt','edit','duetOf','stitchOf','stitchSec','soundOf','soundName','replyTo','addYours','aiLabel','productId','playlistId','city','scheduledAt','visibility'];
     const f={owner:uid,approvedAt:now()};for(const k of keys)if(u[k]!==undefined&&u[k]!==null)f[k]=u[k];
     await App.db.doc(`feed/${id}`).set(f);
     await App.db.doc(`uploads/${uid}/items/${id}`).set({...strip(u),status:'approved',reviewedAt:now()});

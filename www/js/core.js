@@ -30,6 +30,7 @@ const ago=t=>{if(!t)return '';const s=(now()-t)/1000;if(s<60)return 'şimdi';if(
 const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const norm=s=>String(s||'').toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9@._]+/g,' ').trim();
 let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+const BLANK='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const blobUrl=id=>id?(window.BLOB_BASE||'/_blob/')+id:null;
 function hashName(s){let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
 
@@ -104,13 +105,13 @@ function feedDocToVideo(id,f){
     src:blobUrl(f.assetId),imgs:(f.assetIds||[]).map(blobUrl),thumb:blobUrl(f.thumbId),phash:f.phash,
     at:f.approvedAt||f.createdAt||0,edit:f.edit||null,duetOf:f.duetOf||null,stitchOf:f.stitchOf||null,stitchSec:f.stitchSec||5,
     replyTo:f.replyTo||null,addYours:f.addYours||null,aiLabel:!!f.aiLabel,productId:f.productId||null,playlist:f.playlistId||null,
-    city:f.city||p.city||'',scheduledAt:f.scheduledAt||0,L:0,C:0,V:0,S:0,real:true};
+    city:f.city||p.city||'',scheduledAt:f.scheduledAt||0,visibility:f.visibility||'all',L:0,C:0,V:0,S:0,real:true};
 }
 let _vidsCache=null,_vidsKey='';
 function allVideos(){
   const key=Object.keys(D.feed).length+':'+JSON.stringify(Object.keys(D.profiles).length)+':'+Math.floor(now()/60000);
   if(_vidsCache&&_vidsKey===key&&!allVideos.dirty)return _vidsCache;
-  const real=Object.entries(D.feed).map(([id,f])=>feedDocToVideo(id,f)).filter(v=>(!v.scheduledAt||v.scheduledAt<=now()||v.owner===App.uid)&&canSee(v.owner));
+  const real=Object.entries(D.feed).map(([id,f])=>feedDocToVideo(id,f)).filter(v=>(!v.scheduledAt||v.scheduledAt<=now()||v.owner===App.uid)&&canSee(v.owner)&&(v.owner===App.uid||v.visibility==='all'||(v.visibility==='followers'&&iFollow(v.owner))||App.admin&&v.visibility!=='me'));
   _vidsCache=[...real.sort((a,b)=>b.at-a.at),...SAMPLES.map(s=>({...s,city:SU[s.owner].city,at:0}))];_vidsKey=key;allVideos.dirty=false;
   return _vidsCache;
 }

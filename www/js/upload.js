@@ -7,7 +7,7 @@
 const UP={};
 function resetUP(o={}){Object.assign(UP,{mode:'video',file:null,files:[],url:null,urls:[],assetId:null,assetIds:null,thumbId:null,dur:null,cat:null,game:null,cap:'',rules:false,busy:false,
   filter:'none',texts:[],speed:1,txtStyle:'sh',aiLabel:false,productId:null,playlistId:null,schedule:'',addYours:'',startChain:false,stitchSec:5,draftId:null,
-  duetOf:null,stitchOf:null,soundOf:null,replyTo:null},o);if(o.addYours)UP.startChain=false}
+  duetOf:null,stitchOf:null,soundOf:null,replyTo:null,coverFrac:null,visibility:'all',thumbUrl:null,textColor:'#FFFFFF'},o);if(o.addYours)UP.startChain=false}
 resetUP();
 const todayUploads=()=>Object.values(D.myUploads).filter(u=>u.createdAt>=dayStart()&&u.status!=='draft').length;
 const keepCap=()=>{const c=$('#upCap');if(c)UP.cap=c.value;const a=$('#upAY');if(a)UP.addYours=a.value;const s=$('#upSch');if(s)UP.schedule=s.value};
@@ -122,7 +122,7 @@ async function aiCaption(btn){
   try{const frames=UP.mode==='photos'?await Promise.all(UP.urls.slice(0,3).map(imgCanvas)):(await grabFrames(UP.url,[.2,.5,.8])).frames;
     const lim=await App.sample.limits();if(!lim.images)throw 0;
     const r=await App.sample.json(`Bu kareler kısa bir sosyal medya videosundan. Türkçe, samimi, en fazla 15 kelimelik bir açıklama yaz. Emoji en fazla 1 tane. Hashtag kullanma. Yalnızca {"caption":"..."} döndür.`,{images:await Promise.all(frames.map(f=>toBlob(f,.7))),modelTier:'quick',cache:false});
-    if(r&&r.caption){UP.cap=String(r.caption).slice(0,300);SHEETS.upload()}}
+    if(r&&r.caption){UP.cap=String(r.caption).slice(0,300);showPost()}}
   catch(e){toast(e&&e.code==='not_granted'?'Yapay zekâ izni verilmedi':'Öneri alınamadı')}
   finally{if(btn.isConnected){btn.disabled=false;btn.textContent='Yapay zekâ önersin'}}
 }
@@ -155,7 +155,7 @@ async function runPipeline(draft){
     if(!draft||true){
       if(!draft)mark('frames','run');
       if(UP.mode==='photos'){frames=await Promise.all(UP.urls.slice(0,3).map(imgCanvas));dur=Math.max(6,UP.urls.length*3)}
-      else{const r=await grabFrames(UP.url,[.15,.5,.85]);frames=r.frames;dur=r.dur}
+      else{const r=await grabFrames(UP.url,[.15,.5,.85,UP.coverFrac??.5]);UP._cover=r.frames.pop();frames=r.frames;dur=r.dur}
       if(!draft)mark('frames','ok',UP.mode==='photos'?`${UP.urls.length} fotoğraf okundu`:`${Math.round(dur)} saniyelik video, 3 kare alındı`);
       ph=frames.map(dhash).join('');
     }
@@ -177,14 +177,14 @@ async function runPipeline(draft){
     if(App.assets){
       if(UP.mode==='photos'&&!assetIds){assetIds=[];for(const f of UP.files){const a=await App.assets.upload(f);assetIds.push(a.id)}}
       if(UP.mode==='video'&&!assetId){assetId=(await App.assets.upload(UP.file)).id}
-      if(!thumbId)thumbId=(await App.assets.upload(await toBlob(frames[Math.min(1,frames.length-1)]))).id;
+      if(!thumbId)thumbId=(await App.assets.upload(await toBlob(UP.mode==='video'&&UP._cover?UP._cover:frames[Math.min(1,frames.length-1)]))).id;
       UP.assetId=assetId;UP.assetIds=assetIds;UP.thumbId=thumbId;mark('up','ok','Yüklendi');
     }else mark('up','warn','Bu görünümde dosya kaydedilemiyor');
     const sch=UP.schedule?new Date(UP.schedule).getTime():0;
     const rec={type:UP.mode,assetId:UP.mode==='video'?assetId:null,assetIds:UP.mode==='photos'?assetIds:null,thumbId,cap:UP.cap.trim().slice(0,300),cat:UP.cat||8,game:UP.game||null,dur:Math.round(dur),phash:ph,status,reason,
       edit:{filter:UP.filter,texts:UP.texts.slice(0,5),speed:UP.speed},duetOf:UP.duetOf,stitchOf:UP.stitchOf,stitchSec:UP.stitchSec,soundOf:UP.soundOf,soundName:UP.soundOf?(vById(UP.soundOf)?.sound||null):null,
       replyTo:UP.replyTo,addYours:(UP.startChain||UP.addYours)?(UP.addYours||'').trim().slice(0,50)||null:null,aiLabel:UP.aiLabel,productId:UP.productId,playlistId:UP.playlistId,
-      city:(D.me&&D.me.city)||'',scheduledAt:sch>now()?sch:0,
+      city:(D.me&&D.me.city)||'',scheduledAt:sch>now()?sch:0,visibility:UP.visibility||'all',
       ai:ai&&!ai.unavailable?{safe:ai.safe,category_ok:ai.category_ok,game_ok:ai.game_ok??null,detected_game:ai.detected_game||null,confidence:ai.confidence||null,summary:ai.summary||'',issues:ai.issues||[]}:(draft?null:{unavailable:true}),createdAt:now()};
     if(App.db)await App.db.doc(`uploads/${App.uid}/items/${vid}`).set(rec);else D.myUploads[vid]={...rec,localUrl:UP.url};
     if(UP.playlistId&&!draft){const pl=local.playlists.list.find(p=>p.id===UP.playlistId);if(pl&&!pl.vids.includes(vid)){pl.vids.push(vid);saveOwn('playlists')}}

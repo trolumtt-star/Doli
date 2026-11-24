@@ -62,18 +62,20 @@ function sceneHTML(s){
   }
   return '';
 }
-function editLayer(e){return e&&e.texts?e.texts.map(t=>`<div class="overlay-text ${t.style==='bg'?'bg':'sh'}" style="left:${+t.x||50}%;top:${+t.y||50}%">${esc(t.t)}</div>`).join(''):''}
+const LIGHT=['#FFFFFF','#D9A520','#F3F4F7'];
+function textCss(t){const c=/^#[0-9a-fA-F]{6}$/.test(t.color||'')?t.color:'#FFFFFF';return t.style==='bg'?`background:${c};color:${LIGHT.includes(c.toUpperCase())?'#16141C':'#fff'}`:`color:${c}`}
+function editLayer(e){return e&&e.texts?e.texts.map(t=>`<div class="overlay-text ${t.style==='bg'?'bg':'sh'}" style="left:${+t.x||50}%;top:${+t.y||50}%;${textCss(t)}">${esc(t.t)}</div>`).join(''):''}
 function mediaHTML(v,role='main'){
   if(!v)return '<div class="scene" style="background:#111"></div>';
   if(!v.real)return sceneHTML(v);
   const fc='f-'+((v.edit&&v.edit.filter)||'none');
   if(v.type==='photos')return `<div class="carousel ${fc}" data-role="${role}">${v.imgs.map(u=>`<img src="${esc(u)}" alt="" draggable="false">`).join('')}</div>${v.imgs.length>1?`<div class="dots">${v.imgs.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}${editLayer(v.edit)}`;
-  return `<video class="vid ${fc}" data-role="${role}" src="${esc(v.src)}" ${v.thumb?`poster="${esc(v.thumb)}"`:''} playsinline loop muted preload="metadata"></video>${editLayer(v.edit)}`;
+  return `<video class="vid ${fc}" data-role="${role}" src="${esc(v.src)}" poster="${esc(v.thumb||BLANK)}" playsinline loop muted preload="metadata"></video>${editLayer(v.edit)}`;
 }
 function slideMedia(v){
   if(v.duetOf){const o=vById(v.duetOf);return `<div class="duet"><div>${mediaHTML(o,'ref')}</div><div>${mediaHTML(v)}</div></div><div class="ref-chip">Düet: @${esc(o?person(o.owner).handle:'video')}</div>`}
   if(v.stitchOf){const o=vById(v.stitchOf);return `<div class="media stitch-ref" style="position:absolute;inset:0">${mediaHTML(o,'ref')}</div><div class="media stitch-main" style="position:absolute;inset:0;visibility:hidden">${mediaHTML(v)}</div><div class="ref-chip">Stitch: @${esc(o?person(o.owner).handle:'video')}</div>`}
-  return mediaHTML(v)+(v.soundOf&&vById(v.soundOf)&&vById(v.soundOf).real?`<video class="snd" src="${esc(vById(v.soundOf).src)}" muted loop playsinline preload="none" style="display:none"></video>`:'');
+  return mediaHTML(v)+(v.soundOf&&vById(v.soundOf)&&vById(v.soundOf).real?`<video class="snd" poster="${BLANK}" src="${esc(vById(v.soundOf).src)}" muted loop playsinline preload="none" style="display:none"></video>`:'');
 }
 function plOf(v){
   if(!v.playlist)return null;
