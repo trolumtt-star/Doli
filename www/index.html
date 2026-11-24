@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Kısa Video Uygulaması</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <section class="screen on" id="s-home" aria-label="Akış">
+    <div class="feed" id="feed"></div>
+    <div class="feed-top">
+      <button class="live-btn" onclick="openLiveList()" aria-label="Canlı yayınlar"><i></i>CANLI</button>
+      <div class="feed-tabs" role="tablist">
+        <button role="tab" data-feed="nearby" aria-selected="false">Yakın</button>
+        <button role="tab" data-feed="friends" aria-selected="false">Arkadaşlar</button>
+        <button role="tab" data-feed="following" aria-selected="false">Takip</button>
+        <button role="tab" data-feed="foryou" aria-selected="true">Senin için</button>
+      </div>
+      <button class="icon-btn" aria-label="Ara" onclick="go('discover',{focus:true})"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg></button>
+    </div>
+    <button class="icon-btn mute" id="muteBtn" aria-label="Sesi aç" style="background:rgba(0,0,0,.25)"></button>
+  </section>
+
+  <section class="screen" id="s-discover" aria-label="Keşfet">
+    <div class="top" style="flex-direction:column;align-items:stretch;gap:12px">
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg><input id="q" type="search" placeholder="Video, kişi, ses veya oyun ara" autocomplete="off" aria-label="Ara"></label>
+      <div class="chips" id="catChips"></div>
+    </div>
+    <div class="wrap" id="discoverBody"></div>
+  </section>
+
+  <section class="screen" id="s-inbox" aria-label="Gelen kutusu">
+    <div class="top"><h1>Gelen kutusu</h1><button class="icon-btn" aria-label="Yeni mesaj" onclick="newChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button></div>
+    <div class="wrap" id="inboxBody"></div>
+  </section>
+
+  <section class="screen" id="s-profile" aria-label="Profil">
+    <div class="top"><h1 id="pfTitle">Profil</h1>
+      <button class="icon-btn" aria-label="Üretici stüdyosu" onclick="openSheet('studio')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></button>
+      <button class="icon-btn" aria-label="Ayarlar" onclick="openSheet('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+    </div>
+    <div id="profileBody"></div>
+  </section>
+
+  <nav class="nav on-video" id="nav" aria-label="Ana menü">
+    <button data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8 2.6 10.5h2.6V21h5.2v-6.2h3.2V21h5.2V10.5h2.6z"/></svg>Akış</button>
+    <button data-go="discover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg>Keşfet</button>
+    <button data-go="upload" aria-label="Paylaş ve 1 lira kazan"><span class="coin"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></button>
+    <button data-go="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M4 4h16v12H9l-5 4z"/></svg>Gelen<span class="dotbadge" id="badge" hidden></span></button>
+    <button data-go="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4.4 4.4-6 8-6s6.8 1.6 8 6"/></svg>Profil</button>
+  </nav>
+
+  <!-- tam ekran katmanlar -->
+  <div class="layer dark" id="storyLayer" aria-label="Hikâye"></div>
+  <div class="layer" id="chatLayer" aria-label="Sohbet"></div>
+  <div class="layer dark" id="liveLayer" aria-label="Canlı yayın"></div>
+  <div class="create" id="createLayer" aria-label="Gönderi oluştur"></div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+    <div class="grab"></div>
+    <div class="sh-head"><h3 id="shTitle"></h3><button class="close" aria-label="Kapat" onclick="closeSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sh-body" id="shBody"></div>
+    <div class="sh-foot" id="shFoot" hidden></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="onb"></div>
+  <div class="loading" id="loading"><span class="coin"><span class="face">1₺</span></span></div>
+</div>
+<script src="vendor/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script src="js/feed.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/money.js"></script>
+<script src="js/social.js"></script>
+<script src="js/upload.js"></script>
+<script src="js/create.js"></script>
+<script src="js/live.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

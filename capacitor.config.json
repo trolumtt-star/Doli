@@ -1,0 +1,7 @@
+{
+  "appId": "com.doli.app",
+  "appName": "Doli",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "server": { "androidScheme": "https" }
+}
