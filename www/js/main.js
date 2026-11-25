@@ -25,6 +25,7 @@ function renderDiscover(){
     const lives=liveActive();const chains=[...new Set(allVideos().filter(v=>v.addYours).map(v=>v.addYours))];
     h+=`<div class="campaign" style="margin-top:6px"><span class="coin"><span class="face">1₺</span></span><div class="grow"><h3>Videon onaylanınca ${tl(CFG.reward)} kazan</h3><p>${tl(CFG.payoutAt)} biriktirince Google Play kodu alırsın.</p></div></div>
       <button class="btn primary full" style="margin-top:10px" onclick="openUpload()">Video yükle</button>`;
+    h+=starsHTML();
     if(lives.length)h+=`<h2 class="sec">Şu an canlı</h2><div class="live-list">${lives.slice(0,4).map(([u,l])=>{const p=person(u),v=l.vid&&vById(l.vid);return `<button class="live-card" onclick="joinLive('${esc(u)}')">${v&&v.thumb?`<img src="${esc(v.thumb)}" alt="">`:`<div style="position:absolute;inset:0;background:${esc(p.c)}"></div>`}<span class="live-tag">CANLI</span><div class="info">@${esc(p.handle)}</div></button>`}).join('')}</div>`;
     if(chains.length)h+=`<h2 class="sec">Senin sıran zincirleri</h2><div class="chips wrapx">${chains.slice(0,6).map(c=>`<button class="chip" onclick="openSheet('chain',${JSON.stringify(c).replace(/"/g,'&quot;')})">${esc(c)}</button>`).join('')}</div>`;
     h+=`<h2 class="sec">En çok izlenen etiketler</h2>`+tags.map((x,i)=>`<button class="trend" onclick="setCat(${x.c.id})"><span class="n">${i+1}</span><span class="ic">${x.c.e}</span><span class="grow b">${x.c.name}</span><span class="s muted">${fmt(x.n)} izlenme</span></button>`).join('');
@@ -56,14 +57,15 @@ function renderProfile(){
   const list=tabs[UI.pfTab]||[];const mine=activeStories(App.uid);const myLive=D.lives[App.uid]&&D.lives[App.uid].active;
   $('#profileBody').innerHTML=`
    <div class="pf-head"><button class="story-av" style="margin:0 auto;width:auto" onclick="${mine.length?`viewStories(['${esc(App.uid)}'])`:'openSheet(\'storyNew\')'}" aria-label="Hikâye"><span class="ring ${mine.length?'':'add'}" style="padding:3px">${avaHTML(me).replace('class="ava "','class="ava" style="width:96px;height:96px;font-size:48px;background:'+esc(me.c)+';color:#fff"')}</span></button>
-    <h2>${esc(me.name)} ${D.me&&D.me.private?I.lock.replace('<svg','<svg width="16" height="16" style="display:inline;vertical-align:-2px"'):''}</h2>${me.bio||me.city?`<div class="bio">${esc(me.bio)}${me.city?(me.bio?' · ':'')+esc(me.city):''}</div>`:''}
-    <div class="stats"><div><b>${followingCount()}</b><span>takip</span></div><div><b>${fmt(followerCount(App.uid))}</b><span>takipçi</span></div><div><b>${fmt(allVideos().filter(v=>v.owner===App.uid).reduce((a,v)=>a+likeCount(v),0))}</b><span>beğeni</span></div></div>
+    <h2>${esc(me.name)} <span class="lvl-pill">Lv ${level()}</span> ${D.me&&D.me.private?I.lock.replace('<svg','<svg width="16" height="16" style="display:inline;vertical-align:-2px"'):''}</h2>${me.bio||me.city?`<div class="bio">${esc(me.bio)}${me.city?(me.bio?' · ':'')+esc(me.city):''}</div>`:''}
+    <div class="stats"><div><b data-count="${followingCount()}">${followingCount()}</b><span>takip</span></div><div><b>${fmt(followerCount(App.uid))}</b><span>takipçi</span></div><div><b>${fmt(allVideos().filter(v=>v.owner===App.uid).reduce((a,v)=>a+likeCount(v),0))}</b><span>beğeni</span></div></div>
     <div class="row" style="justify-content:center;flex-wrap:wrap"><button class="btn soft" onclick="editProfile()">Profili düzenle</button><button class="btn soft" onclick="openSheet('studio')">Stüdyo</button><button class="btn soft" onclick="${myLive?`joinLive('${esc(App.uid)}')`:'openSheet(\'goLive\')'}">${myLive?'Yayına dön':'Canlı yayın'}</button></div>
    </div>
-   <div style="padding:18px 18px 0"><button class="jar" onclick="openSheet('wallet')"><span class="coin" style="--s:52px"><span class="face">1₺</span></span><div class="grow"><div class="s" style="color:var(--money-ink)">Kumbaram</div><div class="amt">${tl(b)}</div><div class="meter"><i style="width:${Math.min(100,b/CFG.payoutAt*100)}%"></i></div><div class="xs" style="color:var(--money-ink);margin-top:5px">${b>=CFG.payoutAt?'Google Play kodu alabilirsin':`${tl(CFG.payoutAt)} olunca Google Play kodu`}</div></div></button></div>
+   <div style="padding:18px 18px 0"><button class="jar" onclick="openSheet('wallet')"><span class="coin" style="--s:52px"><span class="face">1₺</span></span><div class="grow"><div class="s" style="color:var(--money-ink)">Kumbaram</div><div class="amt">${tl(b)}</div><div class="meter"><i style="width:${Math.min(100,b/CFG.payoutAt*100)}%"></i></div><div class="xs" style="color:var(--money-ink);margin-top:5px">${b>=CFG.payoutAt?'Google Play kodu alabilirsin':`${tl(CFG.payoutAt)} olunca Google Play kodu`}</div></div></button>${retainCardHTML()}</div>
    <div class="tabs" role="tablist" style="overflow-x:auto">${[['videos','Videolar'],['drafts',`Taslak${tabs.drafts.length?' ('+tabs.drafts.length+')':''}`],['reposts','Repost'],['saved','Kayıtlı'],['liked','Beğeni']].map(([k,t])=>`<button role="tab" aria-selected="${UI.pfTab===k}" onclick="UI.pfTab='${k}';renderProfile()">${t}</button>`).join('')}</div>
    ${UI.pfTab==='saved'?`<div style="padding:10px 18px 0"><button class="btn soft sm" onclick="openSheet('colls')">Koleksiyonlar (${Object.keys(D.prefs.colls||{}).length+Object.values(D.shared).filter(s=>(s.members||[]).includes(App.uid)).length})</button></div>`:''}
-   ${list.length?`<div class="grid" style="padding:3px">${list.map(tileHTML).join('')}</div>`:`<div class="empty">${UI.pfTab==='videos'?`<h3>İlk videonu yükle</h3>Onaylanınca kumbarana ${tl(CFG.reward)} eklenir.<br><button class="btn primary" style="margin-top:14px" onclick="openUpload()">Video yükle</button>`:UI.pfTab==='drafts'?'<h3>Taslağın yok</h3>Yükleme ekranında “Taslak kaydet” dediğin gönderiler burada durur.':'<h3>Burası boş</h3>'}</div>`}`;
+   ${list.length?`<div class="grid" style="padding:1.5px 0">${list.map(tileHTML).join('')}</div>`:`<div class="empty">${UI.pfTab==='videos'?`<h3>İlk videonu yükle</h3>Onaylanınca kumbarana ${tl(CFG.reward)} eklenir.<br><button class="btn primary" style="margin-top:14px" onclick="openUpload()">Video yükle</button>`:UI.pfTab==='drafts'?'<h3>Taslağın yok</h3>Yükleme ekranında “Taslak kaydet” dediğin gönderiler burada durur.':'<h3>Burası boş</h3>'}</div>`}`;
+  countUps($('#profileBody'));
 }
 function editProfile(){
   const me=myProfile();let pickE=me.e,pickC=me.c;
@@ -119,7 +121,7 @@ async function showOnboarding(){
     D.profiles[App.uid]=D.me;
     if(App.db){try{await App.db.doc(`profiles/${App.uid}`).set(D.me)}catch(e){dbErr(e)}savePrefs(0);saveSignals();initKeys()}
     o.innerHTML='';if(st.consent&&!adult)toast('18 yaşından küçük olduğun için kişiselleştirilmiş reklam kapalı');
-    buildFeed();
+    buildFeed();retainBoot();
   };
 }
 
@@ -130,7 +132,9 @@ function currentScreen(){const s=$('.screen.on');return s?s.id.slice(2):'home'}
 function go(name,opt={}){
   if(name==='upload')return openUpload();
   if(name!=='home'&&currentScreen()==='home'){commitWatch();cancelAnimationFrame(raf);$$('#feed video').forEach(v=>v.pause())}
+  const prev=currentScreen();
   $$('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+name));
+  if(typeof onGo==='function')onGo(name,prev);
   $$('.nav>button[data-go]').forEach(b=>{if(b.dataset.go===name)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
   $('#nav').classList.toggle('on-video',name==='home');
   $('meta[name=theme-color]').content=name==='home'?'#000000':'#FFFFFF';
@@ -147,9 +151,9 @@ async function boot(){
   App.ready=true;
   $('#app').classList.toggle('calm',!!D.prefs.calm);
   UI.lastBalance=balance();
-  $('#loading').style.opacity=0;setTimeout(()=>$('#loading').remove(),320);
+  const wait=Math.max(0,1100-performance.now());setTimeout(()=>{$('#loading').classList.add('out');setTimeout(()=>$('#loading').remove(),600)},wait);
   if(!D.prefs.termsAt)showOnboarding();else initKeys();
-  renderBadge();buildFeed();
+  renderBadge();buildFeed();navIndicator('home');if(D.prefs.termsAt)retainBoot();
   const h=location.hash.match(/^#v-([\w-]+)$/);if(h)setTimeout(()=>playFrom(h[1]),300);
 }
 boot();

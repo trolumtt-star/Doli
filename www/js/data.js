@@ -32,12 +32,12 @@ const gift=id=>GIFTS.find(g=>g.id===id);
 
 /* ---- örnek hesaplar ve videolar: sayfanın içinde, veritabanında değil ---- */
 const SU={
- 's:efe':{handle:'kahkaha.efe',name:'Efe',e:'🤪',c:'#E8590C',bio:'Her gün bir skeç',fol:128400,city:'İstanbul'},
- 's:reis':{handle:'pubg.reis',name:'Reis',e:'🎯',c:'#16141C',bio:'PUBG Mobile, Fatih Asya',fol:56200,city:'Ankara'},
+ 's:efe':{frame:'gold',lvl:31,handle:'kahkaha.efe',name:'Efe',e:'🤪',c:'#E8590C',bio:'Her gün bir skeç',fol:128400,city:'İstanbul'},
+ 's:reis':{frame:'fire',lvl:22,handle:'pubg.reis',name:'Reis',e:'🎯',c:'#16141C',bio:'PUBG Mobile, Fatih Asya',fol:56200,city:'Ankara'},
  's:zeynep':{handle:'mutfakta.zeynep',name:'Zeynep',e:'👩‍🍳',c:'#E11D48',bio:'15 dakikalık tarifler',fol:301000,city:'İzmir'},
- 's:ece':{handle:'valo.ece',name:'Ece',e:'👑',c:'#3B5BDB',bio:'Valorant klipleri',fol:42000,city:'İstanbul'},
- 's:pati':{handle:'pati.dostlar',name:'Patiler',e:'🐱',c:'#0F9F66',bio:'Sokak hayvanları',fol:890000,city:'Bursa'},
- 's:ritim':{handle:'dans.ritim',name:'Ritim',e:'🕺',c:'#7048E8',bio:'Koreografi',fol:240000,city:'Antalya'},
+ 's:ece':{frame:'galaxy',lvl:27,handle:'valo.ece',name:'Ece',e:'👑',c:'#3B5BDB',bio:'Valorant klipleri',fol:42000,city:'İstanbul'},
+ 's:pati':{frame:'neon',lvl:14,handle:'pati.dostlar',name:'Patiler',e:'🐱',c:'#0F9F66',bio:'Sokak hayvanları',fol:890000,city:'Bursa'},
+ 's:ritim':{frame:'rainbow',lvl:35,handle:'dans.ritim',name:'Ritim',e:'🕺',c:'#7048E8',bio:'Koreografi',fol:240000,city:'Antalya'},
  's:ali':{handle:'gezgin.ali',name:'Ali',e:'🎒',c:'#0C8599',bio:'81 il turu',fol:77000,city:'Rize'},
  's:can':{handle:'mc.usta',name:'Can',e:'⛏️',c:'#2B8A3E',bio:'Minecraft yapıları',fol:18300,city:'Ankara'},
  's:hoca':{handle:'fizik.hoca',name:'Hoca',e:'🧪',c:'#3B5BDB',bio:'60 saniyede bilim',fol:156000,city:'Eskişehir'},

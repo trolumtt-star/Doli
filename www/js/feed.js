@@ -155,6 +155,7 @@ function commitWatch(){
   const it=feedItems[active],ms=Math.round(elapsed());active=-1;
   addUsage(ms);
   if(ms<250||it.ad)return;
+  if(typeof track==='function')track('watch',ms,it.v);
   const v=it.v,d=durOf(it)*1000,k=ikey(v);
   const r=D.prefs.interests[k] ||= {n:0,watch:0,cap:0,skip:0,comp:0,loops:0};
   r.n++;r.watch+=ms;r.cap+=Math.min(ms,30000);r.skip+=ms<2000?1:0;r.comp+=(ms>=d*.9||loops>0)?1:0;r.loops+=loops;

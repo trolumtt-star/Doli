@@ -78,7 +78,7 @@ const I={
  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5 6.5-5s5.7 1.4 6.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.3 0 4 1.2 4.5 4"/></svg>',
  globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></svg>',
 };
-const avaHTML=(p,cls='')=>`<span class="ava ${cls}" style="background:${esc(p.c)};color:#fff">${esc(p.e)}</span>`;
+const avaHTML=(p,cls='')=>{const a=`<span class="ava ${cls}" style="background:${esc(p.c)};color:#fff">${esc(p.e)}</span>`;return p.frame?`<span class="fr fr-${esc(p.frame)}">${a}</span>`:a};
 const mentionHTML=s=>esc(s).replace(/@([a-z0-9_.]{3,24})/g,(m,h)=>`<button class="mention" onclick="event.stopPropagation();openHandle('${h}')">@${h}</button>`);
 
 /* ================================================================
@@ -87,7 +87,7 @@ const mentionHTML=s=>esc(s).replace(/@([a-z0-9_.]{3,24})/g,(m,h)=>`<button class
 function person(id){
   if(SU[id])return {id,...SU[id],sample:true};
   const p=D.profiles[id];
-  if(p)return {id,handle:p.handle||'kullanici',name:p.name||p.handle||'Kullanıcı',e:p.e||'🙂',c:p.c||'#16141C',bio:p.bio||'',fol:0,city:p.city||'',private:!!p.private,set:p.set||{},pk:p.pk||null};
+  if(p)return {id,handle:p.handle||'kullanici',name:p.name||p.handle||'Kullanıcı',e:p.e||'🙂',c:p.c||'#16141C',bio:p.bio||'',fol:0,city:p.city||'',private:!!p.private,set:p.set||{},pk:p.pk||null,lvl:p.lvl||0,frame:p.frame||null,streak:p.streak||0};
   return {id,handle:'kullanici',name:'Kullanıcı',e:'🙂',c:'#16141C',bio:'',fol:0,set:{}};
 }
 function byHandle(h){const id=[...Object.keys(SU),...Object.keys(D.profiles)].find(id=>person(id).handle===h);return id||null}

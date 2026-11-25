@@ -195,6 +195,7 @@ async function runPipeline(draft){
     }
     if(UP.playlistId&&!draft){const pl=local.playlists.list.find(p=>p.id===UP.playlistId);if(pl&&!pl.vids.includes(vid)){pl.vids.push(vid);saveOwn('playlists')}}
     if(draft){finish('ok','Taslak kaydedildi','Profilindeki Taslaklar sekmesinden açıp gönderebilirsin.',`<button class="btn soft full" style="margin-top:12px" onclick="closeSheet();UI.pfTab='drafts';go('profile')">Taslaklara git</button>`);resetUP();return}
+    if(status!=='rejected'&&typeof track==='function')track('upload');
     if(status==='rejected')finish('bad','Gönderi reddedildi',esc(reason)+'. Bu gönderi için ödül verilmez.',`<button class="btn soft full" style="margin-top:12px" onclick="resetUP();openUpload()">Başka gönderi yükle</button>`);
     else if(live)finish('ok','Yayında',`Gönderin akışa eklendi.${rec.scheduledAt?' Belirlediğin saatte görünür olacak.':''} ${tl(CFG.reward)} ödülün yönetici onayıyla kumbarana geçer.`,
       `<button class="btn primary full" style="margin-top:12px" onclick="closeSheet();playFrom('${vid}')">Gönderini izle</button><button class="btn soft full" style="margin-top:8px" onclick="closeSheet();go('profile')">Profilime git</button>`);
